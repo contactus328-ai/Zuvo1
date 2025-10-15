@@ -1,2 +1,2 @@
-# Codex Auto Apply
-This file was created by codex_apply.ps1 from a Codex-style block.
+# Codex Auto Apply (update)
+Version 2 - content updated successfully.
