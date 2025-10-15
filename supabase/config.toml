@@ -1,0 +1,4 @@
+project_id = REPLACE_WITH_YOUR_PROJECT_REF   # find in Supabase > Project Settings > API
+[functions]
+ignored_routes = [*/node_modules/*, */.git/*]
+
