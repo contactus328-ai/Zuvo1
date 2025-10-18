@@ -4,10 +4,6 @@
   "private": true,
   "engines": { "node": "20.x" },
   "packageManager": "npm@10",
-  "overrides": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
-  },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.6",
