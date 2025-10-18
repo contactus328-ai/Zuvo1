@@ -1,11 +1,7 @@
 import { supabase } from "../supabase";
 import type { Session, User } from "@supabase/supabase-js";
 
-export type SessionInfo = {
-  session: Session | null;
-  user: User | null;
-  error?: unknown;
-};
+export type SessionInfo = { session: Session | null; user: User | null; error?: unknown };
 
 /** Return the current session and user (null if not signed in). */
 export async function getSession(): Promise<SessionInfo> {
@@ -14,12 +10,8 @@ export async function getSession(): Promise<SessionInfo> {
 }
 
 /** Subscribe to auth state changes. Returns an unsubscribe function. */
-export function onAuthStateChange(
-  handler: (session: Session | null) => void
-): () => void {
-  const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-    handler(session);
-  });
+export function onAuthStateChange(handler: (session: Session | null) => void): () => void {
+  const { data } = supabase.auth.onAuthStateChange((_e, sess) => handler(sess));
   return () => data.subscription.unsubscribe();
 }
 
@@ -34,4 +26,3 @@ export async function signOut(): Promise<{ error?: unknown }> {
   const { error } = await supabase.auth.signOut();
   return { error };
 }
-
