@@ -1,1 +1,1 @@
-PR: Supabase wiring - operator note.
+PR seed for Codex.
