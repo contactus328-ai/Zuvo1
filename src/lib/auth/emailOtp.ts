@@ -1,5 +1,4 @@
-```ts
-import { supabase } from ../supabaseClient;
+import { supabase } from "../supabase";
 
 export type OtpStartResult = { ok: boolean; error?: unknown };
 export type OtpVerifyResult = { ok: boolean; error?: unknown };
@@ -20,8 +19,10 @@ export async function verifyOtp(
   const { error } = await supabase.auth.verifyOtp({
     email,
     token,
-    type: email,
+    type: "email",
   });
   return { ok: !error, error };
 }
+
+
 
