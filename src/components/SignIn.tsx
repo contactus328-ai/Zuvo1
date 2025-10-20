@@ -116,9 +116,8 @@ export function SignIn({ onSignInComplete }: SignInProps) {
         {/* Content */}
         <div className="flex-1 flex flex-col justify-center px-6 bg-gray-100">
           <div className="text-center mb-8">
-            {/* Logo */}
+            {/* Logo (served from public/assets) */}
             <div className="mb-6">
-              {/* served from public/assets */}
               <img src="/assets/zuvo-logo.png" alt="Zuvo Logo" className="mx-auto h-16 w-auto" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Zuvo</h2>
@@ -143,7 +142,6 @@ export function SignIn({ onSignInComplete }: SignInProps) {
                 </>
               ) : (
                 <>
-                  {/* served from public/assets */}
                   <img src="/assets/gmail-logo.png" alt="Gmail" className="w-5 h-5 object-contain" />
                   <span className="text-gray-700 font-medium">Continue with Gmail</span>
                 </>
