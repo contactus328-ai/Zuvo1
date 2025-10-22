@@ -2,7 +2,9 @@
   "name": "2 Zhevents College Event Management App (Copy)",
   "version": "0.1.0",
   "private": true,
-  "engines": { "node": "20.x" },
+  "engines": {
+    "node": "20.x"
+  },
   "packageManager": "npm@10",
   "overrides": {
     "react": "18.3.1",
