@@ -1,6 +1,8 @@
+import "./consoleHelpers";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { ErrorBoundary } from "./lib/ErrorBoundary";
 import { getSession, onAuthStateChange } from "./lib/auth/session";
 
 (async function boot() {
@@ -9,4 +11,9 @@ import { getSession, onAuthStateChange } from "./lib/auth/session";
   onAuthStateChange((session) => ((window as any).__authUser = session?.user ?? null));
 })();
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+);
+
