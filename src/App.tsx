@@ -179,8 +179,18 @@ export default function App() {
   const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
   const [tempAuthData, setTempAuthData] = useState<{email: string, phone: string} | null>(null);
   
-  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
-  const [selectedEvent, setSelectedEvent] = useState<string>('pandu');
+    // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  // If not authenticated and trying to view a protected screen, go to signin
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);  const [selectedEvent, setSelectedEvent] = useState<string>('pandu');
   const [selectedSubEvent, setSelectedSubEvent] = useState<number | null>(null); // Track specific sub-event
   const [eventsState, setEventsState] = useState(initialEvents);
   const [editingEvent, setEditingEvent] = useState<any>(null);
