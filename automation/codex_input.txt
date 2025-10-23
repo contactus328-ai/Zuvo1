@@ -57,3 +57,149 @@ Append to /WATCHER_TEST.txt
 ---
 Appended at: 2025-10-23T23:14:51.6563995+05:30
 ---
+Save as /vercel.json
+---
+{
+  "version": 2,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=(), payment=()" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co wss://*.supabase.in; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+        }
+      ]
+    }
+  ]
+}
+---
+Save as /src/lib/auth/RequireAuth.tsx
+---
+import React from "react";
+import { supabase } from "../supabase/client"; // adjust path if your client lives elsewhere
+type Props = { children: React.ReactNode; fallback?: React.ReactNode; redirect?: string };
+async function getSession() {
+  const { data } = await supabase.auth.getSession();
+  return { user: data.session?.user ?? null };
+}
+function onAuthStateChange(cb: (session: any) => void) {
+  const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => cb(s));
+  return () => sub.subscription.unsubscribe();
+}
+export function RequireAuth({ children, fallback = null, redirect = "/signin" }: Props) {
+  const [ready, setReady] = React.useState(false);
+  const [authed, setAuthed] = React.useState<boolean | null>(null);
+  React.useEffect(() => {
+    let unsub = () => {};
+    (async () => {
+      const { user } = await getSession();
+      setAuthed(Boolean(user));
+      setReady(true);
+      unsub = onAuthStateChange((session) => setAuthed(Boolean(session?.user)));
+    })();
+    return () => unsub();
+  }, []);
+  if (!ready) return fallback;
+  if (!authed) {
+    if (typeof window !== "undefined") window.location.replace(redirect);
+    return null;
+  }
+  return <>{children}</>;
+}
+---
+Save as /src/lib/validation/auth.ts
+---
+/**
+ * Zod-ready schemas (kept commented so build doesn't require zod yet).
+ * When ready: 
+pm i zod then uncomment imports & exports below, and start using them.
+ */
+// import { z } from "zod";
+// export const emailSchema = z.string().trim().toLowerCase().email().max(254);
+// export const phoneSchema = z.string().trim().regex(/^\+[1-9]\d{6,14}$/, "Use E.164 format");
+// export const otpSchema   = z.string().trim().length(6, "6 digits").regex(/^\d+$/, "Digits only");
+// export const signInEmail = z.object({ email: emailSchema });
+// export const signInPhone = z.object({ phone: phoneSchema });
+// export const verifyOtp   = z.object({ phone: phoneSchema, token: otpSchema });
+---
+Save as /src/lib/rateLimit.ts
+---
+/**
+ * Dev-safe in-memory token bucket. For production, replace with Vercel KV/Redis.
+ */
+type Key = string;
+const BUCKET = new Map<Key, { tokens: number; resetAt: number }>();
+export function rateLimit(key: string, max: number, windowMs: number) {
+  const now = Date.now();
+  const hit = BUCKET.get(key);
+  if (!hit || now > hit.resetAt) {
+    BUCKET.set(key, { tokens: max - 1, resetAt: now + windowMs });
+    return { ok: true, remaining: max - 1, resetIn: windowMs };
+  }
+  if (hit.tokens <= 0) {
+    return { ok: false, remaining: 0, resetIn: Math.max(0, hit.resetAt - now) };
+  }
+  hit.tokens -= 1;
+  return { ok: true, remaining: hit.tokens, resetIn: Math.max(0, hit.resetAt - now) };
+}
+---
+Save as /src/lib/edge/ip.ts
+---
+/**
+ * Best-effort client IP extraction for API/Edge handlers on Vercel.
+ */
+export function getClientIp(headers: Headers): string {
+  const xff = headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0]!.trim();
+  const cf = headers.get("cf-connecting-ip");
+  if (cf) return cf.trim();
+  return "anon";
+}
+---
+Append to /docs/ops/SUPABASE_ORIGINS_CHECKLIST.md
+---
+# Supabase origin lock-down (required before prod)
+These are dashboard actions (cannot be set from this repo):
+1) **Authentication → URL Configuration**
+   - **Site URL**: your production domain only (e.g., https://<prod>.vercel.app/).
+   - **Redirect URLs**: production + preview Vercel domains you control.
+2) **Authentication → Providers (OAuth)**
+   - Each provider: Authorized redirect/callback = same prod/preview domains.
+3) **Storage → CORS**
+   - **Allowed Origins**: prod + preview domains.
+   - **Methods**: GET, PUT (add POST only if needed).
+   - **Headers**: uthorization, content-type.
+   - **Max Age**: 3600.
+4) **Storage → Policies**
+   - Ensure buckets require auth as designed; verify RLS in Postgres.
+5) **Verification**
+   - Run full auth flow on preview & prod; check DevTools for CORS/CSP errors.
+---
+Append to /CHANGELOG.md
+---
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+---
+Save as /docs/release-checklist.md
+---
+# Release checklist (prod)
+- [ ] Supabase Dashboard updated per /docs/ops/SUPABASE_ORIGINS_CHECKLIST.md.
+- [ ] Protected routes use <RequireAuth redirect="/signin" />.
+- [ ] If using validation: 
+pm i zod and uncomment schemas in src/lib/validation/auth.ts.
+- [ ] Sensitive routes use ateLimit() keyed by IP + route + identifier.
+- [ ] Preview deploy: confirm no CSP violations; Realtime connects (wss).
+- [ ] E2E smoke: sign-in → one core protected flow passes.
+- [ ] Tag release and publish notes.
+---
