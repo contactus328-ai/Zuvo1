@@ -390,3 +390,10 @@ Replace in /src/App.tsx
     }
   }, [isAuthenticated, currentScreen]);
 ---
+Replace in /src/App.tsx
+---
+(const\s+\[tempAuthData,[^\r\n]+\r?\n)(\s*// ---- Auth guard:)
+---
+  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+
+---

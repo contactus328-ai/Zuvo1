@@ -177,9 +177,8 @@ export default function App() {
   // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
-  const [tempAuthData, setTempAuthData] = useState<{email: string, phone: string} | null>(null);
-  
-    // ---- Auth guard: which screens require a signed-in user ----
+    const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+ which screens require a signed-in user ----
   const PROTECTED_SCREENS: Screen[] = [
     'home','event_detail','register','results',
     'org_dashboard','add_event','my_org','participants',
