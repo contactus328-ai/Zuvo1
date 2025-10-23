@@ -521,3 +521,22 @@ Replace in /src/App.tsx
   }, [isAuthenticated, currentScreen]);
 
 ---
+# 1) Remove ALL PROTECTED_SCREENS array declarations (anywhere in file)
+Replace in /src/App.tsx
+---
+(?smi)^\s*const\s+PROTECTED_SCREENS:[\s\S]*?\];
+---
+---
+# 2) Remove any inline trailing guard comments after the useEffect dependency array
+Replace in /src/App.tsx
+---
+\]\s*\)\s*;\s*(//\s*----[^\r\n]*)(\s*(//\s*----[^\r\n]*))*\r?\n
+---
+]);
+---
+# 3) Remove any standalone guard comment lines left over
+Replace in /src/App.tsx
+---
+(?mi)^\s*//\s*----\s*Auth guard:.*\r?\n
+---
+---
