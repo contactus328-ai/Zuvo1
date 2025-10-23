@@ -1,0 +1,727 @@
+﻿## Codex input - add your Save as / Append to / Replace in blocks below
+Save as /WATCHER_TEST.txt
+---
+Watcher is working: 2025-10-22T23:24:04.9376000+05:30
+---
+Save as /WATCHER_TEST.txt
+---
+Watcher is working: 2025-10-22T23:28:55.1890213+05:30
+---
+Append to /WATCHER_TEST.txt
+---
+Appended at: 2025-10-22T23:39:14.9945012+05:30
+---
+Append to /WATCHER_TEST.txt
+---
+Appended at: 2025-10-22T23:46:24.0838334+05:30
+---
+Append to /WATCHER_TEST.txt
+---
+Appended at: 2025-10-22T23:49:38.4601714+05:30
+---
+Append to /WATCHER_TEST.txt
+---
+Appended at: 2025-10-22T23:52:50.6840560+05:30
+---
+Append to /WATCHER_TEST.txt
+---
+Appended at: 2025-10-22T23:57:50.5707437+05:30
+---
+Append to /WATCHER_TEST.txt
+---
+Appended at: 2025-10-23T22:35:59.9685015+05:30
+---
+Append to /WATCHER_TEST.txt
+---
+Appended at: 2025-10-23T22:44:42.4221697+05:30
+---
+Replace in /WATCHER_TEST.txt
+---
+Watcher is working: [^\r\n]+
+---
+Watcher is working: REPLACED at 2025-10-23T22:47:25.5526116+05:30
+---
+Append to /WATCHER_TEST.txt
+---
+Appended at: 2025-10-23T22:52:59.5017664+05:30
+---
+Append to /WATCHER_TEST.txt
+---
+Appended at: 2025-10-23T23:08:09.5154893+05:30
+---
+Append to /WATCHER_TEST.txt
+---
+Appended at: 2025-10-23T23:08:59.9688733+05:30
+---
+Append to /WATCHER_TEST.txt
+---
+Appended at: 2025-10-23T23:14:51.6563995+05:30
+---
+Save as /vercel.json
+---
+{
+  "version": 2,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=(), payment=()" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co wss://*.supabase.in; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+        }
+      ]
+    }
+  ]
+}
+---
+Save as /src/lib/auth/RequireAuth.tsx
+---
+import React from "react";
+import { supabase } from "../supabase/client"; // adjust path if your client lives elsewhere
+type Props = { children: React.ReactNode; fallback?: React.ReactNode; redirect?: string };
+async function getSession() {
+  const { data } = await supabase.auth.getSession();
+  return { user: data.session?.user ?? null };
+}
+function onAuthStateChange(cb: (session: any) => void) {
+  const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => cb(s));
+  return () => sub.subscription.unsubscribe();
+}
+export function RequireAuth({ children, fallback = null, redirect = "/signin" }: Props) {
+  const [ready, setReady] = React.useState(false);
+  const [authed, setAuthed] = React.useState<boolean | null>(null);
+  React.useEffect(() => {
+    let unsub = () => {};
+    (async () => {
+      const { user } = await getSession();
+      setAuthed(Boolean(user));
+      setReady(true);
+      unsub = onAuthStateChange((session) => setAuthed(Boolean(session?.user)));
+    })();
+    return () => unsub();
+  }, []);
+  if (!ready) return fallback;
+  if (!authed) {
+    if (typeof window !== "undefined") window.location.replace(redirect);
+    return null;
+  }
+  return <>{children}</>;
+}
+---
+Save as /src/lib/validation/auth.ts
+---
+/**
+ * Zod-ready schemas (kept commented so build doesn't require zod yet).
+ * When ready: 
+pm i zod then uncomment imports & exports below, and start using them.
+ */
+// import { z } from "zod";
+// export const emailSchema = z.string().trim().toLowerCase().email().max(254);
+// export const phoneSchema = z.string().trim().regex(/^\+[1-9]\d{6,14}$/, "Use E.164 format");
+// export const otpSchema   = z.string().trim().length(6, "6 digits").regex(/^\d+$/, "Digits only");
+// export const signInEmail = z.object({ email: emailSchema });
+// export const signInPhone = z.object({ phone: phoneSchema });
+// export const verifyOtp   = z.object({ phone: phoneSchema, token: otpSchema });
+---
+Save as /src/lib/rateLimit.ts
+---
+/**
+ * Dev-safe in-memory token bucket. For production, replace with Vercel KV/Redis.
+ */
+type Key = string;
+const BUCKET = new Map<Key, { tokens: number; resetAt: number }>();
+export function rateLimit(key: string, max: number, windowMs: number) {
+  const now = Date.now();
+  const hit = BUCKET.get(key);
+  if (!hit || now > hit.resetAt) {
+    BUCKET.set(key, { tokens: max - 1, resetAt: now + windowMs });
+    return { ok: true, remaining: max - 1, resetIn: windowMs };
+  }
+  if (hit.tokens <= 0) {
+    return { ok: false, remaining: 0, resetIn: Math.max(0, hit.resetAt - now) };
+  }
+  hit.tokens -= 1;
+  return { ok: true, remaining: hit.tokens, resetIn: Math.max(0, hit.resetAt - now) };
+}
+---
+Save as /src/lib/edge/ip.ts
+---
+/**
+ * Best-effort client IP extraction for API/Edge handlers on Vercel.
+ */
+export function getClientIp(headers: Headers): string {
+  const xff = headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0]!.trim();
+  const cf = headers.get("cf-connecting-ip");
+  if (cf) return cf.trim();
+  return "anon";
+}
+---
+Append to /docs/ops/SUPABASE_ORIGINS_CHECKLIST.md
+---
+# Supabase origin lock-down (required before prod)
+These are dashboard actions (cannot be set from this repo):
+1) **Authentication → URL Configuration**
+   - **Site URL**: your production domain only (e.g., https://<prod>.vercel.app/).
+   - **Redirect URLs**: production + preview Vercel domains you control.
+2) **Authentication → Providers (OAuth)**
+   - Each provider: Authorized redirect/callback = same prod/preview domains.
+3) **Storage → CORS**
+   - **Allowed Origins**: prod + preview domains.
+   - **Methods**: GET, PUT (add POST only if needed).
+   - **Headers**: uthorization, content-type.
+   - **Max Age**: 3600.
+4) **Storage → Policies**
+   - Ensure buckets require auth as designed; verify RLS in Postgres.
+5) **Verification**
+   - Run full auth flow on preview & prod; check DevTools for CORS/CSP errors.
+---
+Append to /CHANGELOG.md
+---
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+---
+Save as /docs/release-checklist.md
+---
+# Release checklist (prod)
+- [ ] Supabase Dashboard updated per /docs/ops/SUPABASE_ORIGINS_CHECKLIST.md.
+- [ ] Protected routes use <RequireAuth redirect="/signin" />.
+- [ ] If using validation: 
+pm i zod and uncomment schemas in src/lib/validation/auth.ts.
+- [ ] Sensitive routes use ateLimit() keyed by IP + route + identifier.
+- [ ] Preview deploy: confirm no CSP violations; Realtime connects (wss).
+- [ ] E2E smoke: sign-in → one core protected flow passes.
+- [ ] Tag release and publish notes.
+---
+Save as /src/lib/auth/protect.tsx
+---
+import React from "react";
+import { RequireAuth } from "./RequireAuth";
+/**
+ * Helper to wrap any element in <RequireAuth>.
+ * Usage: element={protect(<Dashboard />)}
+ */
+export function protect<T>(el: React.ReactNode, redirect = "/signin") {
+  return <RequireAuth redirect={redirect}>{el}</RequireAuth>;
+}
+---
+# ---------- React Router v6 (JSX <Route> form) - src/App.tsx ----------
+# Ensure import for RequireAuth exists (insert after the FIRST import line)
+Replace in /src/App.tsx
+---
+^(\s*import[^\n]*\n)
+---
+ { RequireAuth } from "./lib/auth/RequireAuth";
+---
+# Wrap element for /dashboard if not already protected
+Replace in /src/App.tsx
+---
+(<Route\s+path="/dashboard"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# Wrap element for /settings
+Replace in /src/App.tsx
+---
+(<Route\s+path="/settings"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# Wrap element for /account
+Replace in /src/App.tsx
+---
+(<Route\s+path="/account"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# Optional: if you use a "/app" container route
+Replace in /src/App.tsx
+---
+(<Route\s+path="/app"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# ---------- React Router v6 (route object array) - src/routes.tsx ----------
+# Ensure import (insert after FIRST import)
+Replace in /src/routes.tsx
+---
+^(\s*import[^\n]*\n)
+---
+ { RequireAuth } from "./lib/auth/RequireAuth";
+---
+# Wrap route object element for /dashboard if not already protected
+Replace in /src/routes.tsx
+---
+(path:\s*"/dashboard"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+# /settings
+Replace in /src/routes.tsx
+---
+(path:\s*"/settings"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+# /account
+Replace in /src/routes.tsx
+---
+(path:\s*"/account"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+# /app (optional)
+Replace in /src/routes.tsx
+---
+(path:\s*"/app"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+# ---------- Same transforms if your router file is src/router.tsx ----------
+Replace in /src/router.tsx
+---
+^(\s*import[^\n]*\n)
+---
+ { RequireAuth } from "./lib/auth/RequireAuth";
+---
+Replace in /src/router.tsx
+---
+(path:\s*"/dashboard"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+Replace in /src/router.tsx
+---
+(path:\s*"/settings"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+Replace in /src/router.tsx
+---
+(path:\s*"/account"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+Replace in /src/router.tsx
+---
+(path:\s*"/app"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+# Ensure import for RequireAuth exists (insert after the FIRST import line)
+Replace in /src/App.tsx
+---
+^(\s*import[^\n]*\n)
+---
+ { RequireAuth } from "./lib/auth/RequireAuth";
+---
+# Wrap element for /dashboard if not already protected
+Replace in /src/App.tsx
+---
+(<Route\s+path="/dashboard"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# Wrap element for /settings
+Replace in /src/App.tsx
+---
+(<Route\s+path="/settings"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# Wrap element for /account
+Replace in /src/App.tsx
+---
+(<Route\s+path="/account"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# Optional: wrap /app container route
+Replace in /src/App.tsx
+---
+(<Route\s+path="/app"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# App.tsx - insert a client-side guard that forces signin for protected screens
+Replace in /src/App.tsx
+---
+(^\s*const\s+\[currentScreen,\s*setCurrentScreen\][\s\S]*?;\s*$)
+---
+
+  // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  // If not authenticated and trying to view a protected screen, go to signin
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
+Replace in /src/App.tsx
+---
+(const\s+\[currentScreen,\s*setCurrentScreen\][^\r\n]*\r?\n)
+---
+
+  // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  // If not authenticated and trying to view a protected screen, go to signin
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
+Replace in /src/App.tsx
+---
+(const\s+\[tempAuthData,[^\r\n]+\r?\n)(\s*// ---- Auth guard:)
+---
+  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+
+---
+Replace in /src/App.tsx
+---
+^\s*which screens require a signed-in user ----\s*$
+---
+  // ---- Auth guard: which screens require a signed-in user ----
+---
+# Case 1: phrase appears right after the dependency array on the same line
+Replace in /src/App.tsx
+---
+\]\);\s*which screens require a signed-in user ----
+---
+]);
+  // ---- Auth guard: which screens require a signed-in user ----
+---
+# Case 2: any other occurrence of the raw phrase (fallback)
+Replace in /src/App.tsx
+---
+which screens require a signed-in user ----
+---
+  // ---- Auth guard: which screens require a signed-in user ----
+---
+Replace in /src/App.tsx
+---
+[\t ]*// If not authenticated and trying to view a protected screen, go to signin[\s\S]*?\]\s*\)\s*;\s*//\s*----\s*Auth guard: which screens require a signed-in user ----[\s\S]*?const\s+PROTECTED_SCREENS:[\s\S]*?\];[\s\S]*?// If not authenticated and trying to view a protected screen, go to signin[\s\S]*?\]\s*\)\s*;
+---
+  // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  // If not authenticated and trying to view a protected screen, go to signin
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
+# 1) Remove any stray inline comment after the useEffect dependency array
+Replace in /src/App.tsx
+---
+\]\);\s*//\s*----\s*Auth guard:.*$
+---
+]);
+---
+# 2) Remove ALL existing PROTECTED_SCREENS array declarations (we'll re-add one cleanly)
+Replace in /src/App.tsx
+---
+^\s*const\s+PROTECTED_SCREENS:[\s\S]*?\];\s*
+---
+---
+# 3) Insert one clean guard block right after currentScreen state
+Replace in /src/App.tsx
+---
+(const\s+\[currentScreen,\s*setCurrentScreen\][^\r\n]*\r?\n)
+---
+  // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  // If not authenticated and trying to view a protected screen, go to signin
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
+# 1) Remove every PROTECTED_SCREENS block (anywhere in file)
+Replace in /src/App.tsx
+---
+(?ms)^\s*const\s+PROTECTED_SCREENS:[\s\S]*?\];\s*
+---
+---
+# 2) Remove any stray/duplicate guard comment lines
+Replace in /src/App.tsx
+---
+(?m)^\s*//\s*----\s*Auth guard:.*\r?\n
+---
+---
+# 3) Fix any inline trailing comment after the useEffect dependency array
+Replace in /src/App.tsx
+---
+\]\s*\)\s*;\s*//[^\r\n]*\r?\n
+---
+]);
+---
+# 4) Insert ONE clean guard block right after currentScreen state
+Replace in /src/App.tsx
+---
+(const\s+\[currentScreen,\s*setCurrentScreen\][^\r\n]*\r?\n)
+---
+  // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  // If not authenticated and trying to view a protected screen, go to signin
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
+Replace in /src/App.tsx
+---
+(const\s+\[tempAuthData,[^\r\n]*\r?\n)[\s\S]*?(\r?\n\s*const\s+\[selectedEvent,\s*setSelectedEvent\])
+---
+  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+  // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+
+---
+# 1) Remove ALL PROTECTED_SCREENS array declarations (anywhere in file)
+Replace in /src/App.tsx
+---
+(?smi)^\s*const\s+PROTECTED_SCREENS:[\s\S]*?\];
+---
+---
+# 2) Remove any inline trailing guard comments after the useEffect dependency array
+Replace in /src/App.tsx
+---
+\]\s*\)\s*;\s*(//\s*----[^\r\n]*)(\s*(//\s*----[^\r\n]*))*\r?\n
+---
+]);
+---
+# 3) Remove any standalone guard comment lines left over
+Replace in /src/App.tsx
+---
+(?mi)^\s*//\s*----\s*Auth guard:.*\r?\n
+---
+---
+# 1) Remove ALL PROTECTED_SCREENS declarations (loose match, no ^ anchor)
+Replace in /src/App.tsx
+---
+const\s+PROTECTED_SCREENS:[\s\S]*?\];
+---
+---
+# 2) Remove duplicated guard useEffect blocks that specifically reference PROTECTED_SCREENS/includes(currentScreen)
+Replace in /src/App.tsx
+---
+useEffect\(\s*=>\s*\{\s*if\s*\(!isAuthenticated\s*&&\s*PROTECTED_SCREENS\.includes\(currentScreen\)\)\s*\{\s*setCurrentScreen\('signin'\);\s*\}\s*\}\s*,\s*\[isAuthenticated,\s*currentScreen\]\s*\)\s*;
+---
+---
+# 3) Insert ONE clean guard block right after currentScreen state
+Replace in /src/App.tsx
+---
+(const\s+\[currentScreen,\s*setCurrentScreen\][^\r\n]*\r?\n)
+---
+  // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
+# Remove the duplicate PROTECTED_SCREENS block that comes right after the useEffect([...]);
+Replace in /src/App.tsx
+---
+\]\s*\)\s*;[^\r\n]*\r?\n\s*const\s+PROTECTED_SCREENS:[\s\S]*?\];
+---
+]);
+---
+# A) Normalize the noisy guard comment line
+Replace in /src/App.tsx
+---
+(?mi)^\s*//\s*[-\s]*Auth guard:.*$
+---
+  // ---- Auth guard: which screens require a signed-in user ----
+---
+# B) Remove ALL guard useEffect blocks that reference PROTECTED_SCREENS.includes(currentScreen)
+Replace in /src/App.tsx
+---
+useEffect\(\s*=>\s*\{\s*if\s*\(!isAuthenticated\s*&&\s*PROTECTED_SCREENS\.includes\(currentScreen\)\)\s*\{\s*setCurrentScreen\('signin'\);\s*\}\s*\}\s*,\s*\[isAuthenticated,\s*currentScreen\]\s*\)\s*;
+---
+---
+# C) Ensure currentScreen state exists (add it right after isProfileComplete state)
+Replace in /src/App.tsx
+---
+(const\s+\[isProfileComplete,\s*setIsProfileComplete\][^\r\n]*\r?\n)
+---
+  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+---
+# D) Insert ONE clean guard effect immediately after the PROTECTED_SCREENS array
+Replace in /src/App.tsx
+---
+(const\s+PROTECTED_SCREENS:[\s\S]*?\];\s*\r?\n)
+---
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
+# 1) Add the currentScreen state right after isProfileComplete
+Replace in /src/App.tsx
+---
+(const\s+\[isProfileComplete,\s*setIsProfileComplete\][^\r\n]*\r?\n)
+---
+  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+---
+# 2) Delete ALL guard effects that reference PROTECTED_SCREENS.includes(currentScreen)
+Replace in /src/App.tsx
+---
+useEffect\(\s*=>\s*\{\s*if\s*\(!isAuthenticated\s*&&\s*PROTECTED_SCREENS\.includes\(currentScreen\)\)\s*\{\s*setCurrentScreen\('signin'\);\s*\}\s*\}\s*,\s*\[isAuthenticated,\s*currentScreen\]\s*\)\s*;
+---
+---
+# 3) Insert ONE clean guard effect immediately after the PROTECTED_SCREENS array
+Replace in /src/App.tsx
+---
+(const\s+PROTECTED_SCREENS:[\s\S]*?\];\s*\r?\n)
+---
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
+# 1) Remove any existing currentScreen state (cleanup)
+Replace in /src/App.tsx
+---
+(?m)^\s*const\s+\[currentScreen,\s*setCurrentScreen\][^\r\n]*\r?\n
+---
+---
+# 2) Insert the state right after isProfileComplete (before any usage)
+Replace in /src/App.tsx
+---
+(const\s+\[isProfileComplete,\s*setIsProfileComplete\][^\r\n]*\r?\n)
+---
+  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+---
+# 3) Remove ALL guard effects referencing PROTECTED_SCREENS/includes(currentScreen)
+Replace in /src/App.tsx
+---
+useEffect\(\s*=>\s*\{\s*if\s*\(!isAuthenticated\s*&&\s*PROTECTED_SCREENS\.includes\(currentScreen\)\)\s*\{\s*setCurrentScreen\('signin'\);\s*\}\s*\}\s*,\s*\[isAuthenticated,\s*currentScreen\]\s*\)\s*;
+---
+---
+# 4) Insert ONE clean guard effect immediately after the PROTECTED_SCREENS array
+Replace in /src/App.tsx
+---
+(const\s+PROTECTED_SCREENS:[\s\S]*?\];\s*\r?\n)
+---
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
+# A) Add the currentScreen state directly after the isProfileComplete state (literal match)
+Replace in /src/App.tsx
+---
+const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
+---
+const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
+  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+---
+# B) Remove ALL existing guard effects that reference PROTECTED_SCREENS.includes(currentScreen)
+Replace in /src/App.tsx
+---
+useEffect\(\s*=>\s*\{\s*if\s*\(!isAuthenticated\s*&&\s*PROTECTED_SCREENS\.includes\(currentScreen\)\)\s*\{\s*setCurrentScreen\('signin'\);\s*\}\s*\}\s*,\s*\[isAuthenticated,\s*currentScreen\]\s*\)\s*;
+---
+---
+# C) Insert ONE clean guard effect right after the PROTECTED_SCREENS array (literal anchor on the closing bracket line)
+Replace in /src/App.tsx
+---
+const PROTECTED_SCREENS: Screen\[] = \[
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+---
+const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
+# 1) Remove ALL guard effects that reference PROTECTED_SCREENS.includes(currentScreen)
+Replace in /src/App.tsx
+---
+(?s)useEffect\(\s*=>\s*\{\s*if\s*\(!isAuthenticated[\s\S]*?PROTECTED_SCREENS\.includes\(currentScreen\)[\s\S]*?\]\s*\)\s*;
+---
+---
+# 2) Remove ANY existing PROTECTED_SCREENS declarations
+Replace in /src/App.tsx
+---
+(?s)const\s+PROTECTED_SCREENS:[\s\S]*?\];
+---
+---
+# 3) Insert currentScreen state + ONE clean guard right after isProfileComplete
+Replace in /src/App.tsx
+---
+(const\s+\[isProfileComplete,\s*setIsProfileComplete\][^\r\n]*\r?\n)
+---
+  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+  // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---

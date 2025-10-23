@@ -1,22 +1,18 @@
-import LRUCache from "lru-cache";
-
+﻿/**
+ * Dev-safe in-memory token bucket. For production, replace with Vercel KV/Redis.
+ */
 type Key = string;
-const windowMs = 60_000;
-const max = 20;
-
-const cache = new LRUCache<Key, { count: number; ts: number }>({
-  max: 50_000,
-});
-
-export function rateLimit(key: Key, limit = max, windowMillis = windowMs) {
+const BUCKET = new Map<Key, { tokens: number; resetAt: number }>();
+export function rateLimit(key: string, max: number, windowMs: number) {
   const now = Date.now();
-  const rec = cache.get(key);
-  if (!rec || now - rec.ts > windowMillis) {
-    cache.set(key, { count: 1, ts: now });
-    return { ok: true, remaining: limit - 1 };
+  const hit = BUCKET.get(key);
+  if (!hit || now > hit.resetAt) {
+    BUCKET.set(key, { tokens: max - 1, resetAt: now + windowMs });
+    return { ok: true, remaining: max - 1, resetIn: windowMs };
   }
-  if (rec.count >= limit) return { ok: false, remaining: 0 };
-  rec.count++;
-  cache.set(key, rec);
-  return { ok: true, remaining: limit - rec.count };
+  if (hit.tokens <= 0) {
+    return { ok: false, remaining: 0, resetIn: Math.max(0, hit.resetAt - now) };
+  }
+  hit.tokens -= 1;
+  return { ok: true, remaining: hit.tokens, resetIn: Math.max(0, hit.resetAt - now) };
 }
