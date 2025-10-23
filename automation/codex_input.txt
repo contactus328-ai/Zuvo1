@@ -576,3 +576,34 @@ Replace in /src/App.tsx
 ---
 ]);
 ---
+# A) Normalize the noisy guard comment line
+Replace in /src/App.tsx
+---
+(?mi)^\s*//\s*[-\s]*Auth guard:.*$
+---
+  // ---- Auth guard: which screens require a signed-in user ----
+---
+# B) Remove ALL guard useEffect blocks that reference PROTECTED_SCREENS.includes(currentScreen)
+Replace in /src/App.tsx
+---
+useEffect\(\s*=>\s*\{\s*if\s*\(!isAuthenticated\s*&&\s*PROTECTED_SCREENS\.includes\(currentScreen\)\)\s*\{\s*setCurrentScreen\('signin'\);\s*\}\s*\}\s*,\s*\[isAuthenticated,\s*currentScreen\]\s*\)\s*;
+---
+---
+# C) Ensure currentScreen state exists (add it right after isProfileComplete state)
+Replace in /src/App.tsx
+---
+(const\s+\[isProfileComplete,\s*setIsProfileComplete\][^\r\n]*\r?\n)
+---
+  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+---
+# D) Insert ONE clean guard effect immediately after the PROTECTED_SCREENS array
+Replace in /src/App.tsx
+---
+(const\s+PROTECTED_SCREENS:[\s\S]*?\];\s*\r?\n)
+---
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
