@@ -403,3 +403,18 @@ Replace in /src/App.tsx
 ---
   // ---- Auth guard: which screens require a signed-in user ----
 ---
+# Case 1: phrase appears right after the dependency array on the same line
+Replace in /src/App.tsx
+---
+\]\);\s*which screens require a signed-in user ----
+---
+]);
+  // ---- Auth guard: which screens require a signed-in user ----
+---
+# Case 2: any other occurrence of the raw phrase (fallback)
+Replace in /src/App.tsx
+---
+which screens require a signed-in user ----
+---
+  // ---- Auth guard: which screens require a signed-in user ----
+---
