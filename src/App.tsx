@@ -177,7 +177,7 @@ export default function App() {
   // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
-      // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard: which screens require a signed-in user ----
+      // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard: which screens require a signed-in user ----
     useEffect(() => {
     if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
       setCurrentScreen('signin');
