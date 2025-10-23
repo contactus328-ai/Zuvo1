@@ -203,3 +203,118 @@ pm i zod and uncomment schemas in src/lib/validation/auth.ts.
 - [ ] E2E smoke: sign-in → one core protected flow passes.
 - [ ] Tag release and publish notes.
 ---
+Save as /src/lib/auth/protect.tsx
+---
+import React from "react";
+import { RequireAuth } from "./RequireAuth";
+/**
+ * Helper to wrap any element in <RequireAuth>.
+ * Usage: element={protect(<Dashboard />)}
+ */
+export function protect<T>(el: React.ReactNode, redirect = "/signin") {
+  return <RequireAuth redirect={redirect}>{el}</RequireAuth>;
+}
+---
+# ---------- React Router v6 (JSX <Route> form) - src/App.tsx ----------
+# Ensure import for RequireAuth exists (insert after the FIRST import line)
+Replace in /src/App.tsx
+---
+^(\s*import[^\n]*\n)
+---
+ { RequireAuth } from "./lib/auth/RequireAuth";
+---
+# Wrap element for /dashboard if not already protected
+Replace in /src/App.tsx
+---
+(<Route\s+path="/dashboard"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# Wrap element for /settings
+Replace in /src/App.tsx
+---
+(<Route\s+path="/settings"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# Wrap element for /account
+Replace in /src/App.tsx
+---
+(<Route\s+path="/account"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# Optional: if you use a "/app" container route
+Replace in /src/App.tsx
+---
+(<Route\s+path="/app"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# ---------- React Router v6 (route object array) - src/routes.tsx ----------
+# Ensure import (insert after FIRST import)
+Replace in /src/routes.tsx
+---
+^(\s*import[^\n]*\n)
+---
+ { RequireAuth } from "./lib/auth/RequireAuth";
+---
+# Wrap route object element for /dashboard if not already protected
+Replace in /src/routes.tsx
+---
+(path:\s*"/dashboard"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+# /settings
+Replace in /src/routes.tsx
+---
+(path:\s*"/settings"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+# /account
+Replace in /src/routes.tsx
+---
+(path:\s*"/account"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+# /app (optional)
+Replace in /src/routes.tsx
+---
+(path:\s*"/app"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+# ---------- Same transforms if your router file is src/router.tsx ----------
+Replace in /src/router.tsx
+---
+^(\s*import[^\n]*\n)
+---
+ { RequireAuth } from "./lib/auth/RequireAuth";
+---
+Replace in /src/router.tsx
+---
+(path:\s*"/dashboard"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+Replace in /src/router.tsx
+---
+(path:\s*"/settings"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+Replace in /src/router.tsx
+---
+(path:\s*"/account"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
+Replace in /src/router.tsx
+---
+(path:\s*"/app"\s*,\s*element:\s*)(?!<RequireAuth>)(<[^,]+>)
+---
+<RequireAuth></RequireAuth>
+---
