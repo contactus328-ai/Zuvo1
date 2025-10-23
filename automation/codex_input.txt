@@ -569,3 +569,10 @@ Replace in /src/App.tsx
     }
   }, [isAuthenticated, currentScreen]);
 ---
+# Remove the duplicate PROTECTED_SCREENS block that comes right after the useEffect([...]);
+Replace in /src/App.tsx
+---
+\]\s*\)\s*;[^\r\n]*\r?\n\s*const\s+PROTECTED_SCREENS:[\s\S]*?\];
+---
+]);
+---
