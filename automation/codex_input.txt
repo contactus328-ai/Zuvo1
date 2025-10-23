@@ -397,3 +397,9 @@ Replace in /src/App.tsx
   const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
 
 ---
+Replace in /src/App.tsx
+---
+^\s*which screens require a signed-in user ----\s*$
+---
+  // ---- Auth guard: which screens require a signed-in user ----
+---
