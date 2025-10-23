@@ -503,3 +503,21 @@ Replace in /src/App.tsx
     }
   }, [isAuthenticated, currentScreen]);
 ---
+Replace in /src/App.tsx
+---
+(const\s+\[tempAuthData,[^\r\n]*\r?\n)[\s\S]*?(\r?\n\s*const\s+\[selectedEvent,\s*setSelectedEvent\])
+---
+  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+  // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+
+---
