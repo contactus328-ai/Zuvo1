@@ -631,3 +631,33 @@ Replace in /src/App.tsx
     }
   }, [isAuthenticated, currentScreen]);
 ---
+# 1) Remove any existing currentScreen state (cleanup)
+Replace in /src/App.tsx
+---
+(?m)^\s*const\s+\[currentScreen,\s*setCurrentScreen\][^\r\n]*\r?\n
+---
+---
+# 2) Insert the state right after isProfileComplete (before any usage)
+Replace in /src/App.tsx
+---
+(const\s+\[isProfileComplete,\s*setIsProfileComplete\][^\r\n]*\r?\n)
+---
+  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+---
+# 3) Remove ALL guard effects referencing PROTECTED_SCREENS/includes(currentScreen)
+Replace in /src/App.tsx
+---
+useEffect\(\s*=>\s*\{\s*if\s*\(!isAuthenticated\s*&&\s*PROTECTED_SCREENS\.includes\(currentScreen\)\)\s*\{\s*setCurrentScreen\('signin'\);\s*\}\s*\}\s*,\s*\[isAuthenticated,\s*currentScreen\]\s*\)\s*;
+---
+---
+# 4) Insert ONE clean guard effect immediately after the PROTECTED_SCREENS array
+Replace in /src/App.tsx
+---
+(const\s+PROTECTED_SCREENS:[\s\S]*?\];\s*\r?\n)
+---
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
