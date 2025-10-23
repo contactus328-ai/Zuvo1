@@ -353,3 +353,22 @@ Replace in /src/App.tsx
 ---
 <RequireAuth></RequireAuth>}
 ---
+# App.tsx - insert a client-side guard that forces signin for protected screens
+Replace in /src/App.tsx
+---
+(^\s*const\s+\[currentScreen,\s*setCurrentScreen\][\s\S]*?;\s*$)
+---
+
+  // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  // If not authenticated and trying to view a protected screen, go to signin
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
