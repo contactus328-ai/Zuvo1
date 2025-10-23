@@ -318,3 +318,38 @@ Replace in /src/router.tsx
 ---
 <RequireAuth></RequireAuth>
 ---
+# Ensure import for RequireAuth exists (insert after the FIRST import line)
+Replace in /src/App.tsx
+---
+^(\s*import[^\n]*\n)
+---
+ { RequireAuth } from "./lib/auth/RequireAuth";
+---
+# Wrap element for /dashboard if not already protected
+Replace in /src/App.tsx
+---
+(<Route\s+path="/dashboard"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# Wrap element for /settings
+Replace in /src/App.tsx
+---
+(<Route\s+path="/settings"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# Wrap element for /account
+Replace in /src/App.tsx
+---
+(<Route\s+path="/account"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
+# Optional: wrap /app container route
+Replace in /src/App.tsx
+---
+(<Route\s+path="/app"[^>]*\belement=\{)(?!<RequireAuth>)([^}]+)\}
+---
+<RequireAuth></RequireAuth>}
+---
