@@ -661,3 +661,37 @@ Replace in /src/App.tsx
     }
   }, [isAuthenticated, currentScreen]);
 ---
+# A) Add the currentScreen state directly after the isProfileComplete state (literal match)
+Replace in /src/App.tsx
+---
+const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
+---
+const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
+  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+---
+# B) Remove ALL existing guard effects that reference PROTECTED_SCREENS.includes(currentScreen)
+Replace in /src/App.tsx
+---
+useEffect\(\s*=>\s*\{\s*if\s*\(!isAuthenticated\s*&&\s*PROTECTED_SCREENS\.includes\(currentScreen\)\)\s*\{\s*setCurrentScreen\('signin'\);\s*\}\s*\}\s*,\s*\[isAuthenticated,\s*currentScreen\]\s*\)\s*;
+---
+---
+# C) Insert ONE clean guard effect right after the PROTECTED_SCREENS array (literal anchor on the closing bracket line)
+Replace in /src/App.tsx
+---
+const PROTECTED_SCREENS: Screen\[] = \[
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+---
+const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+---
