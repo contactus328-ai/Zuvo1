@@ -176,8 +176,18 @@ const initialEvents = [
 export default function App() {
   // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
-      // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard: which screens require a signed-in user ----
+    const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+  // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);      // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard: which screens require a signed-in user ----
     useEffect(() => {
     if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
       setCurrentScreen('signin');
