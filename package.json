@@ -17,7 +17,9 @@
     "test:watch": "vitest",
     "e2e": "playwright test --reporter=list",
     "e2e:install": "npx playwright install --with-deps",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "db:apply": "node scripts/db-apply.mjs",
+    "db:rollback": "node scripts/db-rollback.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.3",
