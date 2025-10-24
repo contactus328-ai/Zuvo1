@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Home } from './components/Home';
 import { EventDetail } from './components/EventDetail';
 import { Register } from './components/Register';
@@ -80,38 +80,38 @@ const initialEvents = [
     location: 'Mumbai, Vile Parle',
     dates: '12th to 13th Dec 25',
     type: 'Mixed',
-    competition: 'Intra‑Collegiate',
+    competition: 'Intraâ€‘Collegiate',
     color: 'bg-green-200',
     createdAt: 1704063600000,
     address: '89th Road, Near Aar Centre, Vile Parle, Mumbai 400054',
-    contact: 'Akhat • 9834672322',
+    contact: 'Akhat â€¢ 9834672322',
     entryFees: 'Free',
     deadline: '11 Dec 2025 at 10:00 pm (or until slots are available)',
     otse: 'Yes (Subject to availability)',
     events: [{
       name: 'Event 1',
       type: 'Dancing',
-      competition: 'Inter‑Collegiate',
+      competition: 'Interâ€‘Collegiate',
       groupType: 'Group',
       date: '12 Dec 2025',
       time: '10:00 am',
-      participants: '6–8',
+      participants: '6â€“8',
       rules: ['Rule 1', 'Rule 2', 'Rule 3', 'Rule 4', 'Rule 5'],
-      contact: 'Akhat • 9834672322',
+      contact: 'Akhat â€¢ 9834672322',
       entryFees: 'Free',
       deadline: '11 Dec 2025 at 10:00 pm (or until slots are available)',
       otse: 'Yes (Subject to availability)'
     }, {
       name: 'Event 2',
       type: 'Singing',
-      competition: 'Inter‑Collegiate',
+      competition: 'Interâ€‘Collegiate',
       groupType: 'Solo',
       date: '13 Dec 2025',
       time: '2:00 pm',
       participants: '1',
       rules: ['Rule A', 'Rule B', 'Rule C'],
-      contact: 'Akhat • 9834672322',
-      entryFees: '₹50',
+      contact: 'Akhat â€¢ 9834672322',
+      entryFees: 'â‚¹50',
       deadline: '10 Dec 2025 at 5:00 pm (or until slots are available)',
       otse: 'No'
     }]
@@ -123,7 +123,7 @@ const initialEvents = [
     location: 'Mumbai, Mira Road',
     dates: '15th to 17th Dec 25',
     type: 'Mixed',
-    competition: 'Inter‑Collegiate',
+    competition: 'Interâ€‘Collegiate',
     color: 'bg-yellow-200',
     createdAt: 1704150000000
   },
@@ -134,7 +134,7 @@ const initialEvents = [
     location: 'Mumbai, Ghatkopar',
     dates: '20th to 22nd Dec 25',
     type: 'Mixed',
-    competition: 'Inter‑Collegiate',
+    competition: 'Interâ€‘Collegiate',
     color: 'bg-orange-300',
     createdAt: 1704236400000
   },
@@ -145,7 +145,7 @@ const initialEvents = [
     location: 'Mumbai, Charni Road',
     dates: '10th to 11th Dec 25',
     type: 'Singing',
-    competition: 'Intra‑Collegiate',
+    competition: 'Intraâ€‘Collegiate',
     color: 'bg-amber-200',
     createdAt: 1704322800000
   },
@@ -156,7 +156,7 @@ const initialEvents = [
     location: 'Mumbai, Jogeshwari',
     dates: '8th to 9th Dec 25',
     type: 'Sports',
-    competition: 'Intra‑Collegiate',
+    competition: 'Intraâ€‘Collegiate',
     color: 'bg-green-300',
     createdAt: 1704409200000
   },
@@ -167,7 +167,7 @@ const initialEvents = [
     location: 'Mumbai',
     dates: '25th to 28th Dec 25',
     type: 'Dramatics',
-    competition: 'Inter‑Collegiate',
+    competition: 'Interâ€‘Collegiate',
     color: 'bg-purple-300',
     createdAt: 1704495600000
   }
@@ -176,11 +176,34 @@ const initialEvents = [
 export default function App() {
   // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isProfileComplete, setIsProfileComplete] = useState<boolean>(false);
-  const [tempAuthData, setTempAuthData] = useState<{email: string, phone: string} | null>(null);
-  
-  const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
-  const [selectedEvent, setSelectedEvent] = useState<string>('pandu');
+    const [currentScreen, setCurrentScreen] = useState<Screen>('signin');
+  // ---- Auth guard: which screens require a signed-in user ----
+  const PROTECTED_SCREENS: Screen[] = [
+    'home','event_detail','register','results',
+    'org_dashboard','add_event','my_org','participants',
+    'my_part','profile','liveStream'
+  ];
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);      // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard:   // ---- Auth guard: which screens require a signed-in user ----
+    useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);  // If not authenticated and trying to view a protected screen, go to signin
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);
+  // If not authenticated and trying to view a protected screen, go to signin
+  useEffect(() => {
+    if (!isAuthenticated && PROTECTED_SCREENS.includes(currentScreen)) {
+      setCurrentScreen('signin');
+    }
+  }, [isAuthenticated, currentScreen]);  const [selectedEvent, setSelectedEvent] = useState<string>('pandu');
   const [selectedSubEvent, setSelectedSubEvent] = useState<number | null>(null); // Track specific sub-event
   const [eventsState, setEventsState] = useState(initialEvents);
   const [editingEvent, setEditingEvent] = useState<any>(null);
@@ -558,7 +581,7 @@ export default function App() {
             // Check if email was already sent using localStorage directly
             const sentEmailsFromStorage = loadFromLocalStorage(STORAGE_KEYS.SENT_EMAILS, []);
             if (!sentEmailsFromStorage.includes(event.id)) {
-              console.log(`📧 Participant list for "${event.eventName}" sent to ${profileEmail}`);
+              console.log(`ðŸ“§ Participant list for "${event.eventName}" sent to ${profileEmail}`);
               // Update localStorage directly to avoid state update loops
               const updatedSentEmails = [...sentEmailsFromStorage, event.id];
               saveToLocalStorage(STORAGE_KEYS.SENT_EMAILS, updatedSentEmails);

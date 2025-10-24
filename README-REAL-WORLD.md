@@ -19,7 +19,3 @@ This repo now includes:
 - `VITE_SENTRY_DSN` (and optionally `VITE_RELEASE`)
 
 Create a tag `v1.0.0` to trigger release notes.
-
-## Health endpoint
-- **GET `/api/health`** → `{ ok: true, name, ts, env, commit }`
-- Used by Playwright checks locally and can be polled by external monitors post-deploy.
