@@ -1,2 +1,11 @@
+node_modules/
 .env.local
+dist/
+dist
+node_modules
 
+# Playwright artifacts
+playwright-report/
+test-results/
+.vscode/
+*.log

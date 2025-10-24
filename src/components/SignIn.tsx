@@ -1,29 +1,35 @@
-import React, { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
-import zuvoLogo from 'figma:asset/31ef8d50dc6ae68c6cbc27ae420f2e88184c343d.png';
-import gmailLogo from 'figma:asset/27b187aa0c3e95cb5ad21ad16ecf2008df143405.png';
+import React, { useState } from "react";
+import { ArrowLeft } from "lucide-react";
+import zuvoLogo from "figma:asset/31ef8d50dc6ae68c6cbc27ae420f2e88184c343d.png";
+import gmailLogo from "figma:asset/27b187aa0c3e95cb5ad21ad16ecf2008df143405.png";
 
 /**
  * SignIn Component - Handles user authentication via Gmail or manual email/phone
- * 
+ *
  * Gmail Sign-In Flow:
  * 1. Attempts to detect previously stored Gmail accounts from localStorage
  * 2. Checks for Gmail patterns in autofilled email inputs
  * 3. Falls back to intelligent email generation based on device info
- * 
+ *
  * Note: This is a prototype implementation without real Google OAuth.
  * For production, integrate with Google Identity Services and obtain proper client credentials.
  */
 
 interface SignInProps {
-  onSignInComplete: (email: string, phone: string, isGoogleSignIn: boolean) => void;
+  onSignInComplete: (
+    email: string,
+    phone: string,
+    isGoogleSignIn: boolean,
+  ) => void;
 }
 
 export function SignIn({ onSignInComplete }: SignInProps) {
-  const [signInMethod, setSignInMethod] = useState<'choose' | 'manual' | 'google'>('choose');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [errors, setErrors] = useState<{email?: string, phone?: string}>({});
+  const [signInMethod, setSignInMethod] = useState<
+    "choose" | "manual" | "google"
+  >("choose");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; phone?: string }>({});
   const [isDetectingEmail, setIsDetectingEmail] = useState(false);
 
   const validateEmail = (email: string) => {
@@ -37,18 +43,18 @@ export function SignIn({ onSignInComplete }: SignInProps) {
   };
 
   const handleManualSignIn = () => {
-    const newErrors: {email?: string, phone?: string} = {};
-    
+    const newErrors: { email?: string; phone?: string } = {};
+
     if (!email || !validateEmail(email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Please enter a valid email address";
     }
-    
+
     if (!phone || !validatePhone(phone)) {
-      newErrors.phone = 'Please enter a valid 10-digit phone number';
+      newErrors.phone = "Please enter a valid 10-digit phone number";
     }
-    
+
     setErrors(newErrors);
-    
+
     if (Object.keys(newErrors).length === 0) {
       onSignInComplete(email, phone, false);
     }
@@ -56,21 +62,21 @@ export function SignIn({ onSignInComplete }: SignInProps) {
 
   const handleGoogleSignIn = async () => {
     setIsDetectingEmail(true);
-    
+
     try {
       // Try to detect any existing Gmail accounts on the device
       const detectedEmail = await detectDeviceEmail();
       if (detectedEmail) {
-        console.log('🎯 Found Gmail account on device:', detectedEmail);
+        console.log("🎯 Found Gmail account on device:", detectedEmail);
         setEmail(detectedEmail);
-        setSignInMethod('google');
+        setSignInMethod("google");
       } else {
         // Use smart fallback to create a personalized email
-        console.log('📱 Using smart email generation...');
+        console.log("📱 Using smart email generation...");
         handleGoogleSignInFallback();
       }
     } catch (error) {
-      console.error('Gmail detection error:', error);
+      console.error("Gmail detection error:", error);
       // Fallback to smart email generation
       handleGoogleSignInFallback();
     } finally {
@@ -84,8 +90,8 @@ export function SignIn({ onSignInComplete }: SignInProps) {
   const detectDeviceEmail = async (): Promise<string | null> => {
     try {
       // Method 1: Check if there's a previously stored Gmail account
-      const lastGmail = localStorage.getItem('zhevents_last_gmail');
-      if (lastGmail && lastGmail.includes('@gmail.com')) {
+      const lastGmail = localStorage.getItem("zhevents_last_gmail");
+      if (lastGmail && lastGmail.includes("@gmail.com")) {
         return lastGmail;
       }
 
@@ -93,75 +99,78 @@ export function SignIn({ onSignInComplete }: SignInProps) {
       const emailInputs = document.querySelectorAll('input[type="email"]');
       for (const input of emailInputs) {
         const value = (input as HTMLInputElement).value;
-        if (value && value.includes('@gmail.com')) {
+        if (value && value.includes("@gmail.com")) {
           return value;
         }
       }
 
       // Method 3: Try to detect from session storage
-      const sessionEmail = sessionStorage.getItem('userEmail');
-      if (sessionEmail && sessionEmail.includes('@gmail.com')) {
+      const sessionEmail = sessionStorage.getItem("userEmail");
+      if (sessionEmail && sessionEmail.includes("@gmail.com")) {
         return sessionEmail;
       }
 
       return null;
     } catch (error) {
-      console.log('Email detection failed:', error);
+      console.log("Email detection failed:", error);
       return null;
     }
   };
 
   const handleGoogleSignInFallback = () => {
     // Try to detect common Gmail patterns or use device email if available
-    let detectedEmail = '';
-    
+    let detectedEmail = "";
+
     // Check if there's any stored email from previous sessions
-    const previousEmail = localStorage.getItem('zhevents_last_gmail');
-    if (previousEmail && previousEmail.includes('@gmail.com')) {
+    const previousEmail = localStorage.getItem("zhevents_last_gmail");
+    if (previousEmail && previousEmail.includes("@gmail.com")) {
       detectedEmail = previousEmail;
     } else {
       // Try to get device information to create a more personalized email
       const deviceInfo = getDeviceInfo();
       const timestamp = Date.now().toString().slice(-4);
-      
+
       // Create a more realistic email based on device/user patterns
-      if (deviceInfo.userAgent.includes('Android')) {
+      if (deviceInfo.userAgent.includes("Android")) {
         detectedEmail = `android.user${timestamp}@gmail.com`;
-      } else if (deviceInfo.userAgent.includes('iPhone') || deviceInfo.userAgent.includes('iPad')) {
+      } else if (
+        deviceInfo.userAgent.includes("iPhone") ||
+        deviceInfo.userAgent.includes("iPad")
+      ) {
         detectedEmail = `iphone.user${timestamp}@gmail.com`;
       } else {
         detectedEmail = `mobile.user${timestamp}@gmail.com`;
       }
     }
-    
+
     // Store for future use
-    localStorage.setItem('zhevents_last_gmail', detectedEmail);
-    
+    localStorage.setItem("zhevents_last_gmail", detectedEmail);
+
     setEmail(detectedEmail);
-    setSignInMethod('google');
-    
+    setSignInMethod("google");
+
     // Show a helpful message to the user
-    console.log('🔍 Auto-detected Gmail account:', detectedEmail);
+    console.log("🔍 Auto-detected Gmail account:", detectedEmail);
   };
 
   const getDeviceInfo = () => {
     return {
-      userAgent: navigator.userAgent || '',
-      platform: navigator.platform || '',
-      language: navigator.language || 'en',
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+      userAgent: navigator.userAgent || "",
+      platform: navigator.platform || "",
+      language: navigator.language || "en",
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
     };
   };
 
   const handleGooglePhoneSubmit = () => {
-    const newErrors: {phone?: string} = {};
-    
+    const newErrors: { phone?: string } = {};
+
     if (!phone || !validatePhone(phone)) {
-      newErrors.phone = 'Please enter a valid 10-digit phone number';
+      newErrors.phone = "Please enter a valid 10-digit phone number";
     }
-    
+
     setErrors(newErrors);
-    
+
     if (Object.keys(newErrors).length === 0) {
       onSignInComplete(email, phone, true);
     }
@@ -169,14 +178,14 @@ export function SignIn({ onSignInComplete }: SignInProps) {
 
   const handlePhoneChange = (value: string) => {
     // Only allow numeric input and limit to 10 digits
-    const numericValue = value.replace(/[^0-9]/g, '').slice(0, 10);
+    const numericValue = value.replace(/[^0-9]/g, "").slice(0, 10);
     setPhone(numericValue);
     if (errors.phone && numericValue.length === 10) {
-      setErrors(prev => ({ ...prev, phone: undefined }));
+      setErrors((prev) => ({ ...prev, phone: undefined }));
     }
   };
 
-  if (signInMethod === 'choose') {
+  if (signInMethod === "choose") {
     return (
       <div className="min-h-screen bg-white flex flex-col">
         {/* Content */}
@@ -184,9 +193,15 @@ export function SignIn({ onSignInComplete }: SignInProps) {
           <div className="text-center mb-8">
             {/* Logo */}
             <div className="mb-6">
-              <img src={zuvoLogo} alt="Zuvo Logo" className="mx-auto h-16 w-auto" />
+              <img
+                src={zuvoLogo}
+                alt="Zuvo Logo"
+                className="mx-auto h-16 w-auto"
+              />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Zuvo</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Welcome to Zuvo
+            </h2>
             <p className="text-gray-600">Choose how you'd like to sign in</p>
           </div>
 
@@ -196,9 +211,9 @@ export function SignIn({ onSignInComplete }: SignInProps) {
               onClick={handleGoogleSignIn}
               disabled={isDetectingEmail}
               className={`w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 rounded-lg py-3 px-4 transition-colors ${
-                isDetectingEmail 
-                  ? 'opacity-75 cursor-not-allowed' 
-                  : 'hover:bg-gray-50'
+                isDetectingEmail
+                  ? "opacity-75 cursor-not-allowed"
+                  : "hover:bg-gray-50"
               }`}
             >
               {isDetectingEmail ? (
@@ -206,12 +221,20 @@ export function SignIn({ onSignInComplete }: SignInProps) {
                   <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center">
                     <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                   </div>
-                  <span className="text-gray-700 font-medium">Detecting Gmail Account...</span>
+                  <span className="text-gray-700 font-medium">
+                    Detecting Gmail Account...
+                  </span>
                 </>
               ) : (
                 <>
-                  <img src={gmailLogo} alt="Gmail" className="w-5 h-5 object-contain" />
-                  <span className="text-gray-700 font-medium">Continue with Gmail</span>
+                  <img
+                    src={gmailLogo}
+                    alt="Gmail"
+                    className="w-5 h-5 object-contain"
+                  />
+                  <span className="text-gray-700 font-medium">
+                    Continue with Gmail
+                  </span>
                 </>
               )}
             </button>
@@ -225,7 +248,7 @@ export function SignIn({ onSignInComplete }: SignInProps) {
 
             {/* Manual Sign In Button */}
             <button
-              onClick={() => setSignInMethod('manual')}
+              onClick={() => setSignInMethod("manual")}
               className="w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg py-3 px-4 font-medium transition-colors text-center"
             >
               Sign in with Email id and Phone Number
@@ -240,13 +263,13 @@ export function SignIn({ onSignInComplete }: SignInProps) {
     );
   }
 
-  if (signInMethod === 'manual') {
+  if (signInMethod === "manual") {
     return (
       <div className="min-h-screen bg-white flex flex-col">
         {/* Header */}
         <div className="bg-white text-black p-4 flex items-center border-b border-gray-200">
-          <button 
-            onClick={() => setSignInMethod('choose')}
+          <button
+            onClick={() => setSignInMethod("choose")}
             className="mr-3 p-1 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ArrowLeft size={20} />
@@ -257,8 +280,12 @@ export function SignIn({ onSignInComplete }: SignInProps) {
         {/* Content */}
         <div className="flex-1 px-6 py-8">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Enter Your Details</h2>
-            <p className="text-gray-600">We'll send an OTP to verify your phone number</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Enter Your Details
+            </h2>
+            <p className="text-gray-600">
+              We'll send an OTP to verify your phone number
+            </p>
           </div>
 
           <div className="space-y-6">
@@ -274,10 +301,10 @@ export function SignIn({ onSignInComplete }: SignInProps) {
                   onChange={(e) => {
                     setEmail(e.target.value);
                     if (errors.email && validateEmail(e.target.value)) {
-                      setErrors(prev => ({ ...prev, email: undefined }));
+                      setErrors((prev) => ({ ...prev, email: undefined }));
                     }
                   }}
-                  className={`flex-1 h-12 px-4 bg-white border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg text-base text-black placeholder-black`}
+                  className={`flex-1 h-12 px-4 bg-white border ${errors.email ? "border-red-500" : "border-gray-300"} rounded-lg text-base text-black placeholder-black`}
                   placeholder="Enter your email"
                 />
               </div>
@@ -296,7 +323,7 @@ export function SignIn({ onSignInComplete }: SignInProps) {
                   type="tel"
                   value={phone}
                   onChange={(e) => handlePhoneChange(e.target.value)}
-                  className={`flex-1 h-12 px-4 bg-white border ${errors.phone ? 'border-red-500' : 'border-gray-300'} rounded-lg text-base text-black placeholder-black`}
+                  className={`flex-1 h-12 px-4 bg-white border ${errors.phone ? "border-red-500" : "border-gray-300"} rounded-lg text-base text-black placeholder-black`}
                   placeholder="Enter 10-digit phone number"
                   maxLength={10}
                 />
@@ -317,13 +344,13 @@ export function SignIn({ onSignInComplete }: SignInProps) {
     );
   }
 
-  if (signInMethod === 'google') {
+  if (signInMethod === "google") {
     return (
       <div className="min-h-screen bg-white flex flex-col">
         {/* Header */}
         <div className="bg-white text-black p-4 flex items-center border-b border-gray-200">
-          <button 
-            onClick={() => setSignInMethod('choose')}
+          <button
+            onClick={() => setSignInMethod("choose")}
             className="mr-3 p-1 hover:bg-gray-100 rounded-full transition-colors"
           >
             <ArrowLeft size={20} />
@@ -334,8 +361,12 @@ export function SignIn({ onSignInComplete }: SignInProps) {
         {/* Content */}
         <div className="flex-1 px-6 py-8">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Phone Number Required</h2>
-            <p className="text-gray-600">We need your phone number to send important event updates</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Phone Number Required
+            </h2>
+            <p className="text-gray-600">
+              We need your phone number to send important event updates
+            </p>
           </div>
 
           {/* Google Email Display */}
@@ -358,7 +389,7 @@ export function SignIn({ onSignInComplete }: SignInProps) {
                 type="tel"
                 value={phone}
                 onChange={(e) => handlePhoneChange(e.target.value)}
-                className={`flex-1 h-12 px-4 bg-white border ${errors.phone ? 'border-red-500' : 'border-gray-300'} rounded-lg text-base text-black placeholder-black`}
+                className={`flex-1 h-12 px-4 bg-white border ${errors.phone ? "border-red-500" : "border-gray-300"} rounded-lg text-base text-black placeholder-black`}
                 placeholder="Enter 10-digit phone number"
                 maxLength={10}
               />
@@ -380,3 +411,7 @@ export function SignIn({ onSignInComplete }: SignInProps) {
 
   return null;
 }
+/* Accessibility + image perf tweaks
+Example usage:
+<img src="/assets/zuvo-logo.png" alt="Zuvo" loading="lazy" decoding="async" width="160" height="160" />
+*/
