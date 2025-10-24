@@ -1,0 +1,23 @@
+name: supabase-lock
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ "main" ]
+    paths: [ ".github/workflows/supabase-lock.yml" ]
+jobs:
+  lock:
+    if: ${{ secrets.SUPABASE_ACCESS_TOKEN && secrets.SUPABASE_PROJECT_REF && (secrets.ALLOWED_ORIGINS || vars.ALLOWED_ORIGINS) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lock CORS/Auth/Storage Origins (best-effort)
+        env:
+          ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          ORIGINS: ${{ secrets.ALLOWED_ORIGINS || vars.ALLOWED_ORIGINS }}
+        run: |
+          echo "Locking Supabase allowed origins to: $ORIGINS"
+          # NOTE: Using supabase management API endpoints is subject to change; best-effort placeholder calls:
+          # curl -sS -H "Authorization: Bearer $ACCESS_TOKEN" \
+          #   -X POST https://api.supabase.com/v1/projects/$PROJECT_REF/config \
+          #   -d "{\"auth\": {\"site_url\": \"${ORIGINS%%,*}\"}, \"cors\": {\"allowed_origins\": \"$ORIGINS\"}}"
+          echo "Skipped (placeholder) unless proper API endpoint & scope are available."
