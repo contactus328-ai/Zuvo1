@@ -9,3 +9,6 @@
 
   Run `npm run dev` to start the development server.
   
+  ## Local development
+
+  Started with Codex on Windows.
