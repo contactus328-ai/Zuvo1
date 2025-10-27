@@ -1,9 +1,2 @@
-﻿node_modules/
-.env.local
-dist/
-dist
-node_modules
-build/
-.vercel
-vercel.json.off
-vercel.broken.json
+﻿tictactoe/
+.env.vercel
