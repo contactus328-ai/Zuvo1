@@ -9,7 +9,11 @@ import { ArrowLeft } from "lucide-react";
  */
 
 interface SignInProps {
-  onSignInComplete: (email: string, phone: string, isGoogleSignIn: boolean) => void;
+  onSignInComplete: (
+    email: string,
+    phone: string,
+    isGoogleSignIn: boolean,
+  ) => void;
 }
 
 export function SignIn({ onSignInComplete }: SignInProps) {
@@ -120,7 +124,9 @@ export function SignIn({ onSignInComplete }: SignInProps) {
             <div className="mb-6">
               <img src="/assets/zuvo-logo.png" alt="Zuvo Logo" className="mx-auto h-16 w-auto" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Zuvo</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Welcome to Zuvo
+            </h2>
             <p className="text-gray-600">Choose how you'd like to sign in</p>
           </div>
 
@@ -138,7 +144,9 @@ export function SignIn({ onSignInComplete }: SignInProps) {
                   <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center">
                     <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                   </div>
-                  <span className="text-gray-700 font-medium">Detecting Gmail Account...</span>
+                  <span className="text-gray-700 font-medium">
+                    Detecting Gmail Account...
+                  </span>
                 </>
               ) : (
                 <>
@@ -189,8 +197,12 @@ export function SignIn({ onSignInComplete }: SignInProps) {
         {/* Content */}
         <div className="flex-1 px-6 py-8">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Enter Your Details</h2>
-            <p className="text-gray-600">We'll send an OTP to verify your phone number</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Enter Your Details
+            </h2>
+            <p className="text-gray-600">
+              We'll send an OTP to verify your phone number
+            </p>
           </div>
 
           <div className="space-y-6">
@@ -262,8 +274,12 @@ export function SignIn({ onSignInComplete }: SignInProps) {
         {/* Content */}
         <div className="flex-1 px-6 py-8">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Phone Number Required</h2>
-            <p className="text-gray-600">We need your phone number to send important event updates</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Phone Number Required
+            </h2>
+            <p className="text-gray-600">
+              We need your phone number to send important event updates
+            </p>
           </div>
 
           {/* Google Email Display */}

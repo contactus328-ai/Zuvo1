@@ -1,2 +1,7 @@
-﻿tictactoe/
-.env.vercel
+node_modules/
+.env.local
+dist/
+dist
+node_modules
+
+build/
