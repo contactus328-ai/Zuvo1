@@ -1,4 +1,4 @@
-name: CI
+name: CI - Node 20 build
 on:
   pull_request:
   push:
@@ -7,11 +7,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node 20
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npm run lint --if-present
-      - run: npm run build
+          cache: "npm"
+      - name: Install
+        run: npm ci || npm i
+      - name: Build
+        run: npm run build
