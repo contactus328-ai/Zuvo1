@@ -1,12 +1,180 @@
-# Changelog
-
-## 1.0.0
-
-- Security: CSP hardened, XFO=DENY, referrer policy, permissions policy.
-- Validation: Zod on forms and API.
-- Rate limiting: OTP + API token bucket.
-- Observability: Sentry hooks (env gated).
-- Testing: Playwright smoke + CI.
-- Data: schema + seed + rollback scripts.
-- Policies: Privacy + Terms pages.
-- Build: Analyzer, chunk split, sourcemaps.
+﻿## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
+## [Unreleased]
+### Security / Platform
+- Hardened headers & CSP in ercel.json (XFO=DENY, nosniff, strict referrer, minimal permissions; Supabase allowed over https/wss).
+- Added client-side RequireAuth wrapper for protected areas.
+- Added dev-safe 
+ateLimit() util and getClientIp() helper.
+- Added Supabase origins/CORS checklist.
+### Notes
+- Zod schemas are staged (commented). Install zod and uncomment when ready.
